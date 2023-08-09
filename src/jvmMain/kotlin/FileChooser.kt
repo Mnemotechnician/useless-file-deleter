@@ -276,10 +276,10 @@ private fun BottomBar(
 ) {
 	val currentDir by currentDirState
 
-	val canConfirm = (directoryMode && !multiSelect) || selectedFiles.isNotEmpty()
+	val canConfirm = multiSelect || (directoryMode || selectedFiles.isNotEmpty())
 	val usingThisDirectory = directoryMode && !multiSelect && (selectedFiles.isEmpty() || selectedFiles[0] == currentDir)
 
-	val text by remember { derivedStateOf {
+	val text by derivedStateOf {
 		val fdString = if (directoryMode) "directory" else "file"
 		when {
 			!canConfirm -> "No $fdString is selected"
@@ -287,7 +287,7 @@ private fun BottomBar(
 			selectedFiles.size == 1 -> "Selected $fdString: ${selectedFiles.single().relativeTo(currentDir)}"
 			else -> "Selected ${selectedFiles.size} $fdString entries"
 		}
-	} }
+	}
 
 	Row {
 		Text(text, Modifier.weight(1f).padding(10.dp).width(Min))

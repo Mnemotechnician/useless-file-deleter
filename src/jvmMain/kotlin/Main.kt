@@ -16,6 +16,7 @@ import kotlinx.coroutines.*
 import java.awt.Frame
 import java.io.File
 
+var isDarkTheme by mutableStateOf(true)
 var themeColors: Colors by mutableStateOf(darkColors())
 var baseDirectory by mutableStateOf(File(System.getProperty("user.home")!!))
 val selectedFiles = mutableStateListOf<File>()
@@ -41,12 +42,21 @@ fun App(window: Frame) {
 	MaterialTheme(colors = themeColors) {
 		Surface(Modifier.fillMaxSize(), elevation = 3.dp) {
 			Column {
-				Text(
-					modifier = Modifier.align(Alignment.CenterHorizontally).padding(10.dp),
-					text = "The Ultimate Auto File Deleter",
-					letterSpacing = 5f.sp,
-					fontSize = 30.sp
-				)
+				Box(Modifier.fillMaxWidth()) {
+					Text(
+						modifier = Modifier.align(Alignment.TopCenter).padding(10.dp),
+						text = "The Ultimate Auto File Deleter",
+						letterSpacing = 5f.sp,
+						fontSize = 30.sp
+					)
+
+					OutlinedButton({
+						isDarkTheme = !isDarkTheme
+						themeColors = if (isDarkTheme) darkColors() else lightColors()
+					}, Modifier.align(Alignment.TopEnd)) {
+						Icon(if (isDarkTheme) R.Icon.darkMode else R.Icon.lightMode, null)
+					}
+				}
 
 				Spacer(Modifier.height(20.dp))
 

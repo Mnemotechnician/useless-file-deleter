@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux-artifacts
-          path: build/compose/binaries/main/app/file-deleter/bin
+          path: build/compose/binaries/main-release/app/file-deleter/bin
 
   build_windows:
     runs-on: windows-latest
@@ -44,4 +44,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows-artifacts
-          path: build/compose/binaries/main/app/file-deleter/bin
+          path: build/compose/binaries/main-release/app/file-deleter/bin

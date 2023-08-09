@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux-artifacts
-          path: build/compose/binaries/main-release/app/file-deleter/bin
+          path: build/compose/binaries/main-release/app/file-deleter/
 
   build_windows:
     runs-on: windows-latest
@@ -38,10 +38,10 @@ jobs:
           distribution: 'temurin'
 
       - name: Build for Windows
-        run: ./gradlew packageReleaseExe --info
+        run: ./gradlew packageReleaseExe --info --build-cache
 
       - name: Archive Windows artifacts
         uses: actions/upload-artifact@v2
         with:
           name: windows-artifacts
-          path: build/compose/binaries/main-release/app/file-deleter/bin
+          path: build/compose/binaries/main-release/app/file-deleter/

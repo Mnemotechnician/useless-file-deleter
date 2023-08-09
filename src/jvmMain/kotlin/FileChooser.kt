@@ -9,9 +9,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.*
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -27,20 +27,32 @@ import kotlin.concurrent.thread
  *
  * If the user cancels the selection, [then] is called with a null argument.
  * Otherwise, it may contain one or multiple elements depending on whether [multiSelect] is false or true.
+ *
+ * The [preSelected] parameter can be used to define default selections.
  */
 fun FileChooser(
 	title: String,
 	baseDir: File,
 	directoryMode: Boolean,
 	multiSelect: Boolean,
+	preSelected: List<File>? = null,
 	then: (List<File>?) -> Unit
 ) = thread(isDaemon = true) {
+	val selectedFiles = mutableStateListOf<File>()
+	if (preSelected != null) {
+		selectedFiles.addAll(preSelected.filter(File::exists))
+
+		require(!directoryMode || selectedFiles.all { it.isDirectory }) { "Default selection contains files in directory mode." }
+		require(directoryMode || selectedFiles.all { it.isFile }) { "Default selection contains directories in file mode." }
+		require(multiSelect || selectedFiles.size <= 1) { "Default selection contains multiple files in single-file mode." }
+	}
+
 	application(exitProcessOnExit = false) {
 		Window(onCloseRequest = {
 			then(null)
 			exitApplication()
 		}, title = title) {
-			FileChooserApp(baseDir, directoryMode, multiSelect) {
+			FileChooserApp(baseDir, directoryMode, multiSelect, selectedFiles) {
 				then(it)
 				exitApplication()
 			}
@@ -54,6 +66,7 @@ private fun FileChooserApp(
 	baseDir: File,
 	directoryMode: Boolean,
 	multiSelect: Boolean,
+	selectedFiles: SnapshotStateList<File>,
 	completionFunction: (List<File>?) -> Unit
 ) {
 	val currentDirState = remember {
@@ -63,9 +76,8 @@ private fun FileChooserApp(
 		mutableStateOf(baseDir)
 	}
 	val showHiddenState = remember { mutableStateOf(false) }
-	val selectedFiles = remember { mutableStateListOf<File>() }
 
-	MaterialTheme(colors = darkColors()) {
+	MaterialTheme(colors = themeColors) {
 		Surface(Modifier.fillMaxSize(), elevation = 3.dp) {
 			Column {
 				Surface(Modifier.padding(15.dp).height(Max).fillMaxWidth(), elevation = 2.dp) {
@@ -278,7 +290,7 @@ private fun BottomBar(
 	} }
 
 	Row {
-		Text(text, Modifier.weight(1f).padding(10.dp))
+		Text(text, Modifier.weight(1f).padding(10.dp).width(Min))
 
 		Column(Modifier.padding(10.dp).width(Max)) {
 			// Cancel button
@@ -298,7 +310,7 @@ private fun BottomBar(
 				Text(when {
 					usingThisDirectory -> "Select this directory"
 					else -> "Confirm selection"
-				})
+				}, maxLines = 1)
 			}
 		}
 	}
